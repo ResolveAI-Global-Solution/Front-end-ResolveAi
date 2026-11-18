@@ -3,7 +3,7 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Home from './pages/home/Home'
 import Placeholder from './pages/Placeholder'
-
+import Sobre from './pages/sobre/Sobre'
 export default function App() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -13,7 +13,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/mapa" element={<Placeholder titulo="Mapa" />} />
           <Route path="/placar" element={<Placeholder titulo="Placar" />} />
-          <Route path="/sobre" element={<Placeholder titulo="Sobre" />} />
+          <Route path="/sobre" element={<Sobre />} />
           <Route path="/integrantes" element={<Placeholder titulo="Integrantes" />} />
           <Route path="/faq" element={<Placeholder titulo="FAQ" />} />
           <Route path="/contato" element={<Placeholder titulo="Contato" />} />
