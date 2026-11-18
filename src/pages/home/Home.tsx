@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 import { Plus } from 'lucide-react'
-import MapPreview from '../components/MapPreview'
-import OdsCard from '../components/OdsCard'
-import PlacarRow from '../components/PlacarRow'
-import StatCard from '../components/StatCard'
-import StepCard from '../components/StepCard'
-import { estatisticas, ods, passos, placar } from '../data/home'
+import MapPreview from './components/MapPreview'
+import OdsCard from './components/OdsCard'
+import PlacarRow from './components/PlacarRow'
+import StatCard from './components/StatCard'
+import StepCard from './components/StepCard'
+import { estatisticas, ods, passos, placar } from '../../data/home'
 
 const container = 'mx-auto max-w-6xl px-4 sm:px-6'
 

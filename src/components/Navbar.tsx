@@ -2,19 +2,19 @@ import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { links } from '../data/home'
-import Logo from './Logo'
+import Logo from './Logo.tsx'
 
 export default function Navbar() {
   const [aberto, setAberto] = useState(false)
 
   return (
     <header className="sticky top-0 z-20 border-b border-neutral-200 bg-white">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
         <Link to="/" aria-label="ResolveAI, página inicial">
           <Logo />
         </Link>
 
-        <nav className="hidden items-center gap-6 text-sm font-medium lg:flex" aria-label="Principal">
+        <nav className="hidden items-center gap-7 text-sm font-medium lg:flex" aria-label="Principal">
           {links.map((l) => (
             <NavLink
               key={l.to}

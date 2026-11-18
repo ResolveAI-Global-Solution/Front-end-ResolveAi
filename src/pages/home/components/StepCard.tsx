@@ -1,5 +1,5 @@
 import { BarChart3, Clock, Eye, MapPin } from 'lucide-react'
-import type { Passo } from '../types'
+import type { Passo } from '../../../types'
 
 const icones = { pin: MapPin, eye: Eye, clock: Clock, chart: BarChart3 }
 

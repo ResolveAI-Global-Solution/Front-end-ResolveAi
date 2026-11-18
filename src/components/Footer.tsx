@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { links } from '../data/home'
-import Logo from './Logo'
+import Logo from './Logo.tsx'
 
 export default function Footer() {
   return (
@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <div className="flex flex-col gap-6 md:flex-row md:justify-between">
           <div>
-            <Logo claro />
+            <Logo variante="footer" />
             <p className="mt-2 text-sm text-white/90">Plataforma de ocorrências e transparência urbana.</p>
           </div>
           <nav className="flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold" aria-label="Rodapé">
