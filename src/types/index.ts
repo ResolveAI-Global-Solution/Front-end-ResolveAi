@@ -28,3 +28,8 @@ export interface Ods {
   titulo: string
   descricao: string
 }
+export interface Diferencial {
+  icone: 'users' | 'shield' | 'sparkles'
+  titulo: string
+  descricao: string
+}
