@@ -33,3 +33,11 @@ export interface Diferencial {
   titulo: string
   descricao: string
 }
+export interface ContatoForm {
+  nome: string
+  email: string
+  assunto: string
+  mensagem: string
+}
+
+export type ContatoErros = Partial<Record<keyof ContatoForm, string>>

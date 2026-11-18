@@ -2,8 +2,9 @@ import { Route, Routes } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Home from './pages/home/Home'
-import Placeholder from './pages/Placeholder'
 import Sobre from './pages/sobre/Sobre'
+import Contato from './pages/contato/Contato'
+import Placeholder from './pages/Placeholder'
 export default function App() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -16,7 +17,7 @@ export default function App() {
           <Route path="/sobre" element={<Sobre />} />
           <Route path="/integrantes" element={<Placeholder titulo="Integrantes" />} />
           <Route path="/faq" element={<Placeholder titulo="FAQ" />} />
-          <Route path="/contato" element={<Placeholder titulo="Contato" />} />
+          <Route path="/contato" element={<Contato />} />
           <Route path="/registrar" element={<Placeholder titulo="Registrar ocorrência" />} />
           {/* Rota dinâmica (requisito 02): /ocorrencias/123 */}
           <Route path="/ocorrencias/:id" element={<Placeholder titulo="Detalhe da ocorrência" />} />
