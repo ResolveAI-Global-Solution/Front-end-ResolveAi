@@ -1,4 +1,4 @@
-import { USUARIO_DEMO } from '../data/demo'
+import { USUARIO_DEMO, VIZINHOS_DEMO } from '../data/demo'
 import { idBairroMapa } from '../data/mapa'
 import { categoriasRegistro } from '../data/registro'
 import type { CategoriaOcorrencia, EventoHistorico, OcorrenciaMapa, RegistroOcorrenciaForm, StatusOcorrencia } from '../types'
@@ -156,19 +156,38 @@ export async function buscarOcorrencia(id: number): Promise<OcorrenciaMapa | nul
   }
 }
 
+// Respostas 409 da API que só dizem que este vizinho não serve: aí tenta o próximo
+const VIZINHO_INDISPONIVEL = /registrou esta ocorrência|já apoia esta ocorrência/i
+
 /**
- * POST /ocorrencias/{id}/apoios ("Eu também vi").
- * Modo demonstração: em vez da localização real do navegador, manda as coordenadas da própria
- * ocorrência, para dar para testar de qualquer lugar. A API continua conferindo os 500 m (aqui dá 0 m)
- * e as outras regras (um apoio por pessoa, autor não apoia), respondendo 409 se alguma falhar.
+ * POST /ocorrencias/{id}/apoios ("Eu também vi"). Devolve o nome do vizinho de exemplo usado.
+ * Modo demonstração, para dar para testar de qualquer lugar:
+ * - manda as coordenadas da própria ocorrência, não a localização do navegador (a API confere 500 m; aqui dá 0 m);
+ * - apoia como um vizinho de exemplo que ainda não apoiou e não é o autor (veja VIZINHOS_DEMO).
+ * A API continua igual e aplica todas as regras.
  */
-export async function apoiarOcorrencia(ocorrencia: OcorrenciaMapa): Promise<void> {
+export async function apoiarOcorrencia(ocorrencia: OcorrenciaMapa): Promise<string> {
   const { latitude, longitude } = ocorrencia.coordenadas ?? paraCoordenadas(ocorrencia.posicao)
-  await requisitar(`/ocorrencias/${ocorrencia.id}/apoios`, {
-    method: 'POST',
-    body: JSON.stringify({ cdUsuario: USUARIO_DEMO.id, latitude, longitude }),
-  })
-  avisarAtualizacao()
+
+  // GET /ocorrencias/{id}/apoios: pula quem já apoiou. Se falhar, as tentativas abaixo resolvem.
+  const apoios = await requisitar<{ cdUsuario: number }[]>(`/ocorrencias/${ocorrencia.id}/apoios`).catch(() => [])
+  const jaApoiaram = new Set(apoios.map(({ cdUsuario }) => cdUsuario))
+
+  for (const vizinho of VIZINHOS_DEMO.filter(({ id }) => !jaApoiaram.has(id))) {
+    try {
+      await requisitar(`/ocorrencias/${ocorrencia.id}/apoios`, {
+        method: 'POST',
+        body: JSON.stringify({ cdUsuario: vizinho.id, latitude, longitude }),
+      })
+      avisarAtualizacao()
+      return vizinho.nome
+    } catch (erro) {
+      // Este vizinho é o autor ou já apoiou: tenta o próximo. Qualquer outro erro (ex.: resolvida) para aqui.
+      if (erro instanceof ErroApi && erro.status === 409 && VIZINHO_INDISPONIVEL.test(erro.message)) continue
+      throw erro
+    }
+  }
+  throw new Error('Todos os vizinhos de exemplo já apoiaram esta ocorrência.')
 }
 
 // Guarda neste navegador quais ocorrências já foram apoiadas, só para o botão já abrir marcado.

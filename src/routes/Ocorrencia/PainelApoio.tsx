@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Eye, Users } from 'lucide-react'
 import FotoCampo from '../../components/ocorrencia/FotoCampo'
 import FotoOcorrencia from '../../components/ocorrencia/FotoOcorrencia'
-import { USUARIO_DEMO } from '../../data/demo'
 import { buscarFoto, salvarFoto } from '../../services/fotosLocais'
 import { apoiarOcorrencia, jaApoiou, marcarApoio } from '../../services/ocorrenciaService'
 import type { OcorrenciaMapa } from '../../types'
@@ -18,6 +17,8 @@ export default function PainelApoio({ ocorrencia }: { ocorrencia: OcorrenciaMapa
   const [foto, setFoto] = useState<File | null>(null)
   const [erroFoto, setErroFoto] = useState('')
   const [fotoSalva, setFotoSalva] = useState<Blob>()
+  // Nome do vizinho de exemplo que registrou o apoio, para mostrar na confirmação
+  const [vizinho, setVizinho] = useState('')
   const resolvida = ocorrencia.status === 'resolvida'
 
   // Quem já apoiou vê de novo a foto que tirou
@@ -37,14 +38,14 @@ export default function PainelApoio({ ocorrencia }: { ocorrencia: OcorrenciaMapa
     setErro('')
     setEnviando(true)
     try {
-      await apoiarOcorrencia(ocorrencia)
+      setVizinho(await apoiarOcorrencia(ocorrencia))
       // A foto só é guardada depois que a API aceitou o apoio
       if (foto && (await salvarFoto('apoios', ocorrencia.id, foto))) setFotoSalva(foto)
       marcarApoio(ocorrencia.id)
       setApoiou(true)
       setFoto(null)
     } catch (e) {
-      // Mostra a mensagem da API, ex.: "Você já apoiou esta ocorrência."
+      // Mostra a mensagem da API, ex.: "Esta ocorrência já foi resolvida."
       setErro(e instanceof Error ? e.message : 'Não foi possível registrar o apoio. Tente novamente.')
     } finally {
       setEnviando(false)
@@ -82,8 +83,9 @@ export default function PainelApoio({ ocorrencia }: { ocorrencia: OcorrenciaMapa
             <Eye size={20} aria-hidden />
             {apoiou ? 'Você também viu' : enviando ? 'Registrando...' : 'Eu também vi'}
           </button>
+          {vizinho && <p role="status" className="text-sm text-neutral-700">Apoio registrado como {vizinho}.</p>}
           <p className="text-xs text-neutral-500">
-            Modo demonstração: você apoia como {USUARIO_DEMO.nome}, como se estivesse no local, para dar para testar de qualquer lugar.
+            Modo demonstração: cada apoio entra como um vizinho de exemplo, como se estivesse no local, para dar para testar de qualquer lugar.
           </p>
         </>
       )}
