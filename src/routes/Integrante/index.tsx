@@ -2,7 +2,7 @@ import { ChevronRight, Link2 } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { integrantes } from '../../data/integrantes'
 import { useTituloPagina } from '../../hooks/useTituloPagina'
-import Placeholder from '../Placeholder'
+import NaoEncontrada from '../NaoEncontrada'
 
 const botao =
   'inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border-[1.5px] border-brand bg-white px-5 py-3 font-semibold text-brand hover:bg-brand-soft'
@@ -15,7 +15,15 @@ export default function Integrante() {
   // O hook vem antes do return antecipado: hooks não podem ser chamados de forma condicional
   useTituloPagina(integrante?.nome ?? 'Integrante não encontrado')
 
-  if (!integrante) return <Placeholder titulo="Integrante não encontrado" />
+  if (!integrante) {
+    return (
+      <NaoEncontrada
+        titulo="Integrante não encontrado"
+        texto="Não existe nenhum integrante da equipe com esse RM."
+        voltarPara={{ para: '/integrantes', rotulo: 'Ver integrantes' }}
+      />
+    )
+  }
 
   const { rm, nome, turma, curso, foto, github, linkedin } = integrante
 
