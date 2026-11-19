@@ -5,6 +5,7 @@ import App from './App'
 import Home from './routes/Home'
 import Sobre from './routes/Sobre'
 import Contato from './routes/Contato'
+import Mapa from './routes/Mapa'
 import Placeholder from './routes/Placeholder'
 import './index.css'
 
@@ -14,7 +15,7 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       { path: '/', element: <Home /> },
-      { path: '/mapa', element: <Placeholder titulo="Mapa" /> },
+      { path: '/mapa', element: <Mapa /> },
       { path: '/placar', element: <Placeholder titulo="Placar" /> },
       { path: '/sobre', element: <Sobre /> },
       { path: '/integrantes', element: <Placeholder titulo="Integrantes" /> },
