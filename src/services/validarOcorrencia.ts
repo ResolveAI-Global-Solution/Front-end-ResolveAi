@@ -25,7 +25,7 @@ export function validarOcorrencia(dados: RegistroOcorrenciaForm): RegistroOcorre
   if (dados.endereco.trim().length < limitesRegistro.endereco.min) {
     erros.endereco = 'Informe a rua e o número ou ponto de referência.'
   } else if (dados.endereco.trim().length > limitesRegistro.endereco.max) {
-    erros.endereco = 'O endereço deve ter no máximo 160 caracteres.'
+    erros.endereco = `O endereço deve ter no máximo ${limitesRegistro.endereco.max} caracteres.`
   }
 
   if (dados.bairro.trim().length < limitesRegistro.bairro.min) {
@@ -34,8 +34,8 @@ export function validarOcorrencia(dados: RegistroOcorrenciaForm): RegistroOcorre
     erros.bairro = 'O bairro deve ter no máximo 80 caracteres.'
   }
 
-  const erroFoto = validarFoto(dados.foto)
-  if (erroFoto) erros.foto = erroFoto
+  // A foto ainda não é enviada à API (evolução), então não é exigida no registro.
+  // validarFoto continua aqui para o campo de foto, quando ele voltar.
 
   if (!dados.posicao
     || !Number.isFinite(dados.posicao.x)
