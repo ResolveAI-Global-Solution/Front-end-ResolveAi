@@ -67,8 +67,9 @@ export interface OcorrenciaMapa {
   tempo: string
   posicao: { x: number; y: number }
   descricao?: string
-  // A API ainda não guarda fotos (evolução): por enquanto estes campos chegam vazios
+  // Foto do registro: fica só neste navegador (IndexedDB), a API não guarda fotos
   foto?: Blob
+  // Ainda sem fluxo de envio: chega sempre vazia
   fotoDepois?: Blob
   historico?: EventoHistorico[]
   criadoEm?: string
@@ -80,6 +81,8 @@ export interface RegistroOcorrenciaForm {
   endereco: string
   bairro: string
   posicao: { x: number; y: number }
+  // Opcional; salva só neste navegador, não vai para a API
+  foto: File | null
 }
 
 export type RegistroOcorrenciaErros = Partial<Record<keyof RegistroOcorrenciaForm, string>>

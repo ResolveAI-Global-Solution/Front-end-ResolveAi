@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Camera, Construction, Grid2X2, Lightbulb, LoaderCircle, Shield, TreePine, Waves } from 'lucide-react'
+import { Construction, Grid2X2, Lightbulb, LoaderCircle, Shield, TreePine, Waves } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { categoriasRegistro, limitesRegistro } from '../../data/registro'
+import FotoCampo from '../../components/ocorrencia/FotoCampo'
 import useOcorrencias from '../../hooks/useOcorrencias'
 import { posicaoLivre } from '../../utils/posicao'
 import { registrarOcorrencia } from '../../services/ocorrenciaService'
@@ -18,6 +19,7 @@ const inicial: RegistroOcorrenciaForm = {
   endereco: 'Rua Vergueiro, 1200',
   bairro: 'Vila Mariana',
   posicao: { x: 50, y: 34 },
+  foto: null,
 }
 
 const iconesCategoria = {
@@ -118,14 +120,22 @@ export default function RegistroFormulario() {
           <span>É crime ou emergência? Ligue <a href="tel:190" className="rounded hover:underline focus-visible:outline-2 focus-visible:outline-red-600">190</a>.</span>
         </p>
 
-        {/* A API ainda não guarda fotos: o campo fica reservado, sem fingir o envio (evolução) */}
-        <div className="mt-6 min-w-0">
-          <h2 className="text-lg font-semibold">2. Foto no local</h2>
-          <p className="mt-5 flex items-center gap-3 rounded-lg border border-dashed border-neutral-300 bg-neutral-50 px-4 py-4 text-sm text-neutral-600">
-            <Camera size={20} className="shrink-0" aria-hidden />
-            O envio de foto chega na próxima versão. Por enquanto, descreva bem o problema.
-          </p>
-        </div>
+        {/* A foto é opcional e não vai para a API: fica salva só neste navegador */}
+        <fieldset disabled={enviando} className="mt-6 min-w-0">
+          <legend className="text-lg font-semibold">2. Foto no local <span className="text-sm font-normal text-neutral-500">(opcional)</span></legend>
+          <div className="mt-5">
+            <FotoCampo
+              id="registro-foto"
+              titulo="Foto no local"
+              ajuda="Evite rostos e placas de carro. A foto fica salva só neste navegador."
+              foto={dados.foto}
+              erro={erros.foto}
+              desabilitado={enviando}
+              onAlterar={(foto) => atualizar('foto', foto)}
+              onErro={(mensagem) => setErros((atual) => ({ ...atual, foto: mensagem }))}
+            />
+          </div>
+        </fieldset>
 
         <fieldset disabled={enviando} className="mt-6 min-w-0">
           <legend className="text-lg font-semibold">3. Conte o que você viu</legend>

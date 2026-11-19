@@ -34,8 +34,9 @@ export function validarOcorrencia(dados: RegistroOcorrenciaForm): RegistroOcorre
     erros.bairro = 'O bairro deve ter no máximo 80 caracteres.'
   }
 
-  // A foto ainda não é enviada à API (evolução), então não é exigida no registro.
-  // validarFoto continua aqui para o campo de foto, quando ele voltar.
+  // A foto é opcional (fica só neste navegador); se vier, precisa ser uma imagem válida
+  const erroFoto = dados.foto ? validarFoto(dados.foto) : undefined
+  if (erroFoto) erros.foto = erroFoto
 
   if (!dados.posicao
     || !Number.isFinite(dados.posicao.x)
