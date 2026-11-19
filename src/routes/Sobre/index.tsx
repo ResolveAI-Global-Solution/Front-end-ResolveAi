@@ -1,5 +1,5 @@
 import { diferenciais } from '../../data/sobre'
-import DiferencialCard from './components/DiferencialCard'
+import DiferencialCard from './DiferencialCard'
 
 const container = 'mx-auto max-w-5xl px-4 sm:px-6'
 

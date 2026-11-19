@@ -1,5 +1,5 @@
 import { Shield, Sparkles, Users } from 'lucide-react'
-import type { Diferencial } from '../../../types'
+import type { Diferencial } from '../../types'
 
 const icones = { users: Users, shield: Shield, sparkles: Sparkles }
 

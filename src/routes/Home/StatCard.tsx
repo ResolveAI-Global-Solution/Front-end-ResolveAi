@@ -1,4 +1,4 @@
-import type { Estatistica } from '../../../types'
+import type { Estatistica } from '../../types'
 
 export default function StatCard({ valor, descricao, fonte }: Estatistica) {
   return (
