@@ -1,16 +1,22 @@
-﻿import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Camera, Image, X } from 'lucide-react'
 import { TIPOS_FOTO } from '../../data/registro'
 import { validarFoto } from '../../services/validarOcorrencia'
 
 interface FotoCampoProps {
+  /** id do input; também prefixa os ids da ajuda e do erro */
+  id: string
+  titulo: string
+  ajuda: string
   foto: File | null
   erro?: string
+  desabilitado?: boolean
   onAlterar: (foto: File | null) => void
   onErro: (mensagem: string) => void
 }
 
-export default function FotoCampo({ foto, erro, onAlterar, onErro }: FotoCampoProps) {
+/** Campo de foto opcional, com prévia. A foto fica só no navegador (veja services/fotosLocais). */
+export default function FotoCampo({ id, titulo, ajuda, foto, erro, desabilitado, onAlterar, onErro }: FotoCampoProps) {
   const [previa, setPrevia] = useState('')
   const [horario, setHorario] = useState('')
   const arquivoRef = useRef<HTMLInputElement>(null)
@@ -41,15 +47,15 @@ export default function FotoCampo({ foto, erro, onAlterar, onErro }: FotoCampoPr
     <div>
       <input
         ref={arquivoRef}
-        id="registro-foto"
+        id={id}
         name="foto"
         type="file"
         accept={TIPOS_FOTO.join(',')}
         capture="environment"
-        required
-        aria-label="Foto no local"
+        disabled={desabilitado}
+        aria-label={titulo}
         aria-invalid={!!erro}
-        aria-describedby={`registro-foto-ajuda${erro ? ' erro-registro-foto' : ''}`}
+        aria-describedby={`${id}-ajuda${erro ? ` ${id}-erro` : ''}`}
         className="peer sr-only"
         onChange={(event) => {
           selecionar(event.target.files?.[0])
@@ -73,16 +79,14 @@ export default function FotoCampo({ foto, erro, onAlterar, onErro }: FotoCampoPr
           ) : <Image size={26} aria-hidden />}
         </div>
         <div className="min-w-0 flex-1 basis-40 sm:basis-auto">
-          <p className="text-sm font-semibold">{foto ? `Foto adicionada às ${horario}` : 'Foto no local'}</p>
-          <p id="registro-foto-ajuda" className="mt-1 text-sm leading-5 text-neutral-500">
-            Tire a foto a até 30 m do ponto marcado. Evite rostos e placas de carro.
-          </p>
+          <p className="text-sm font-semibold">{foto ? `Foto adicionada às ${horario}` : titulo}</p>
+          <p id={`${id}-ajuda`} className="mt-1 text-sm leading-5 text-neutral-500">{ajuda}</p>
         </div>
-        <button type="button" onClick={() => arquivoRef.current?.click()} className="inline-flex min-h-13 shrink-0 items-center justify-center gap-2 rounded-lg border border-brand bg-white px-5 py-3 text-sm font-medium text-brand hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+        <button type="button" disabled={desabilitado} onClick={() => arquivoRef.current?.click()} className="disabled:cursor-wait disabled:opacity-60 inline-flex min-h-13 shrink-0 items-center justify-center gap-2 rounded-lg border border-brand bg-white px-5 py-3 text-sm font-medium text-brand hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
           <Camera size={18} aria-hidden /> {foto ? 'Tirar outra' : 'Tirar foto'}
         </button>
       </div>
-      {erro && <p id="erro-registro-foto" className="mt-2 text-sm text-red-700">{erro}</p>}
+      {erro && <p id={`${id}-erro`} className="mt-2 text-sm text-red-700">{erro}</p>}
     </div>
   )
 }

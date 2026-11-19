@@ -6,6 +6,7 @@ import type { HistoricoApi, OcorrenciaApi, StatusApi } from '../types/api'
 import { paraCoordenadas, paraPosicao } from '../utils/coordenadas'
 import { localizacaoAtual } from '../utils/localizacao'
 import { ErroApi, requisitar } from './api'
+import { buscarFoto, buscarFotos, salvarFoto } from './fotosLocais'
 import { validarOcorrencia } from './validarOcorrencia'
 
 // As telas continuam chamando as mesmas funções; só a origem dos dados mudou (navegador -> API Java).
@@ -89,14 +90,21 @@ function paraEventos(historico: HistoricoApi[]): EventoHistorico[] {
 
 /** GET /ocorrencias?bairro=9: as ocorrências do bairro do mapa, das mais novas para as mais antigas. */
 export async function listarOcorrencias(): Promise<OcorrenciaMapa[]> {
-  const lista = await requisitar<OcorrenciaApi[]>(`/ocorrencias?bairro=${idBairroMapa}`)
+  const [lista, fotos] = await Promise.all([
+    requisitar<OcorrenciaApi[]>(`/ocorrencias?bairro=${idBairroMapa}`),
+    buscarFotos('ocorrencias'),
+  ])
   return lista
     .map(paraOcorrenciaMapa)
     .filter((ocorrencia): ocorrencia is OcorrenciaMapa => ocorrencia !== null)
+    .map((ocorrencia) => ({ ...ocorrencia, foto: fotos.get(ocorrencia.id) }))
     .sort((a, b) => Date.parse(b.criadoEm ?? '') - Date.parse(a.criadoEm ?? '') || b.id - a.id)
 }
 
-/** POST /ocorrencias, como o morador de demonstração. A posição do pin vira latitude/longitude. */
+/**
+ * POST /ocorrencias, como o morador de demonstração. A posição do pin vira latitude/longitude.
+ * A foto não vai para a API: fica salva só neste navegador, com o id que a API devolveu.
+ */
 export async function registrarOcorrencia(dados: RegistroOcorrenciaForm): Promise<OcorrenciaMapa> {
   const categoria = categoriasRegistro.find(({ valor }) => valor === dados.categoria)
   if (Object.keys(validarOcorrencia(dados)).length > 0 || !categoria) {
@@ -119,10 +127,13 @@ export async function registrarOcorrencia(dados: RegistroOcorrenciaForm): Promis
     }),
   })
 
+  // Salva antes de avisar as telas, para o mapa já recarregar com a foto
+  const fotoSalva = dados.foto ? await salvarFoto('ocorrencias', criada.id, dados.foto) : false
+
   avisarAtualizacao()
   const ocorrencia = paraOcorrenciaMapa(criada)
   if (!ocorrencia) throw new Error('A ocorrência foi registrada, mas não pôde ser exibida.')
-  return ocorrencia
+  return fotoSalva && dados.foto ? { ...ocorrencia, foto: dados.foto } : ocorrencia
 }
 
 export function historicoDaOcorrencia(ocorrencia: OcorrenciaMapa): EventoHistorico[] {
@@ -132,12 +143,13 @@ export function historicoDaOcorrencia(ocorrencia: OcorrenciaMapa): EventoHistori
 /** GET /ocorrencias/{id} + /historico. Devolve null se a ocorrência não existe (404) ou foi rejeitada. */
 export async function buscarOcorrencia(id: number): Promise<OcorrenciaMapa | null> {
   try {
-    const [dados, historico] = await Promise.all([
+    const [dados, historico, foto] = await Promise.all([
       requisitar<OcorrenciaApi>(`/ocorrencias/${id}`),
       requisitar<HistoricoApi[]>(`/ocorrencias/${id}/historico`),
+      buscarFoto('ocorrencias', id),
     ])
     const ocorrencia = paraOcorrenciaMapa(dados)
-    return ocorrencia ? { ...ocorrencia, historico: paraEventos(historico) } : null
+    return ocorrencia ? { ...ocorrencia, foto, historico: paraEventos(historico) } : null
   } catch (erro) {
     if (erro instanceof ErroApi && erro.status === 404) return null
     throw erro
