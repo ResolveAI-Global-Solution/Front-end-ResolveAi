@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import type { KeyboardEvent, PointerEvent } from 'react'
 import { CircleDot } from 'lucide-react'
+import { USUARIO_DEMO } from '../../data/demo'
 import type { RegistroOcorrenciaErros, RegistroOcorrenciaForm } from '../../types'
 
 interface LocalOcorrenciaProps {
@@ -117,7 +118,7 @@ export default function LocalOcorrencia({ dados, erros, desabilitado, onEndereco
                 type="text"
                 autoComplete="street-address"
                 required
-                maxLength={160}
+                maxLength={150}
                 disabled={desabilitado}
                 value={dados.endereco}
                 onChange={(event) => onEndereco(event.target.value)}
@@ -134,14 +135,16 @@ export default function LocalOcorrencia({ dados, erros, desabilitado, onEndereco
                 name="bairro"
                 type="text"
                 required
+                readOnly
                 maxLength={80}
                 disabled={desabilitado}
                 value={dados.bairro}
                 onChange={(event) => onBairro(event.target.value)}
                 aria-invalid={!!erros.bairro}
-                aria-describedby={erros.bairro ? 'erro-registro-bairro' : undefined}
+                aria-describedby={`registro-bairro-ajuda${erros.bairro ? ' erro-registro-bairro' : ''}`}
                 className={`${campo} ${erros.bairro ? 'border-red-600' : 'border-neutral-300'}`}
               />
+              <p id="registro-bairro-ajuda" className="mt-1.5 text-xs text-neutral-600">Nesta versão, o mapa cobre só Vila Mariana.</p>
               {erros.bairro && <p id="erro-registro-bairro" className="mt-1.5 text-xs text-red-700">{erros.bairro}</p>}
             </div>
             <button type="button" disabled={desabilitado} onClick={() => setEditando(false)} className="min-h-10 rounded-lg border border-brand bg-white px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-wait">Concluir edição</button>
@@ -154,7 +157,7 @@ export default function LocalOcorrencia({ dados, erros, desabilitado, onEndereco
         <ul className="mt-2 list-disc space-y-1 pl-4 text-sm leading-relaxed text-neutral-600">
           <li>Seu nome não aparece em público.</li>
           <li>Se já existir um pedido igual a até 30 m, vamos sugerir apoiar o existente.</li>
-          <li>A foto precisa ser tirada a até 30 m do problema.</li>
+          <li>Modo demonstração: você publica como {USUARIO_DEMO.nome}, morador de exemplo.</li>
         </ul>
       </div>
     </aside>

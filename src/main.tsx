@@ -11,6 +11,7 @@ import Integrantes from './routes/Integrantes'
 import Integrante from './routes/Integrante'
 import Faq from './routes/Faq'
 import Ocorrencia from './routes/Ocorrencia'
+import Placar from './routes/Placar'
 import Placeholder from './routes/Placeholder'
 import './index.css'
 
@@ -21,7 +22,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/', element: <Home /> },
       { path: '/mapa', element: <Mapa /> },
-      { path: '/placar', element: <Placeholder titulo="Placar" /> },
+      { path: '/placar', element: <Placar /> },
       { path: '/sobre', element: <Sobre /> },
       { path: '/integrantes', element: <Integrantes /> },
       { path: '/integrantes/:id', element: <Integrante /> },

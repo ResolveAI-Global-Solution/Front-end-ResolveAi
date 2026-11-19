@@ -29,7 +29,7 @@ export default function MapaBairro({ ocorrencias, selecionada, onSelecionar }: M
 
       <p className="absolute right-4 top-4 z-10 inline-flex max-w-[calc(100%-2rem)] items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm md:right-7">
         <Info size={14} className="shrink-0 text-blue-700" aria-hidden />
-        Mapa ilustrativo: as ruas e posições não são reais
+        Mapa ilustrativo: as ruas não são reais e as posições são aproximadas
       </p>
 
       {ocorrencias.map((ocorrencia) => {

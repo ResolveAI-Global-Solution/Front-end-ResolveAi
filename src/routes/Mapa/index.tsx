@@ -46,7 +46,7 @@ export default function Mapa() {
           <p className="mt-3 text-sm text-neutral-600" role="status">
             {estado === 'carregando' ? 'Carregando ocorrências...' : `${filtradas.length} ${filtradas.length === 1 ? 'ocorrência no mapa' : 'ocorrências no mapa'}`}
           </p>
-          {recemCriada && <p role="status" className="mt-2 text-xs leading-relaxed text-green-800">Ocorrência salva neste navegador e destacada no mapa.</p>}
+          {recemCriada && <p role="status" className="mt-2 text-xs leading-relaxed text-green-800">Ocorrência registrada e destacada no mapa.</p>}
 
           <div className="relative mt-4">
             <Search size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" aria-hidden />
@@ -77,7 +77,7 @@ export default function Mapa() {
 
         <div className="max-h-[400px] overflow-y-auto px-4 pb-6 sm:px-6 md:max-h-none md:flex-1">
           {estado === 'carregando' ? (
-            <p className="py-6 text-sm text-neutral-600" role="status">Buscando registros salvos...</p>
+            <p className="py-6 text-sm text-neutral-600" role="status">Buscando ocorrências... O primeiro acesso do dia pode levar até 1 minuto.</p>
           ) : estado === 'erro' ? (
             <div className="py-6" role="alert">
               <p className="text-sm font-semibold">Não foi possível carregar as ocorrências.</p>
