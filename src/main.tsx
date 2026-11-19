@@ -7,6 +7,7 @@ import Sobre from './routes/Sobre'
 import Contato from './routes/Contato'
 import Integrantes from './routes/Integrantes'
 import Integrante from './routes/Integrante'
+import Faq from './routes/Faq'
 import Placeholder from './routes/Placeholder'
 import './index.css'
 
@@ -21,7 +22,7 @@ const router = createBrowserRouter([
       { path: '/sobre', element: <Sobre /> },
       { path: '/integrantes', element: <Integrantes /> },
       { path: '/integrantes/:id', element: <Integrante /> },
-      { path: '/faq', element: <Placeholder titulo="FAQ" /> },
+      { path: '/faq', element: <Faq /> },
       { path: '/contato', element: <Contato /> },
       { path: '/registrar', element: <Placeholder titulo="Registrar ocorrência" /> },
       // Rota dinâmica (requisito 02): /ocorrencias/123
