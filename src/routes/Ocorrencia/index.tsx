@@ -10,7 +10,6 @@ import Placeholder from '../Placeholder'
 import FotosAntesDepois from './FotosAntesDepois'
 import Historico from './Historico'
 import PainelApoio from './PainelApoio'
-import PrevisaoPrazo from './PrevisaoPrazo'
 
 function dataCurta(iso?: string) {
   if (!iso) return ''
@@ -80,10 +79,9 @@ export default function Ocorrencia() {
             <Historico eventos={historicoDaOcorrencia(ocorrencia)} ocorrencia={ocorrencia} />
           </div>
 
-          <aside className="flex flex-col gap-4" aria-label="Ações e previsão">
+          <aside className="flex flex-col gap-4" aria-label="Ações da ocorrência">
             {/* key: ao trocar de ocorrência, o painel recomeça com o estado de apoio dela */}
             <PainelApoio key={ocorrencia.id} ocorrencia={ocorrencia} />
-            {ocorrencia.status !== 'resolvida' && <PrevisaoPrazo categoria={ocorrencia.categoria} bairro={ocorrencia.bairro} />}
             {denunciada ? (
               <p role="status" className="text-sm text-neutral-600">Denúncia enviada. A publicação será analisada.</p>
             ) : (

@@ -72,11 +72,6 @@ export interface OcorrenciaMapa {
   criadoEm?: string
 }
 
-export interface PrevisaoPrazo {
-  dias: number
-  risco: 'baixo' | 'médio' | 'alto'
-}
-
 export interface RegistroOcorrenciaForm {
   categoria: CategoriaRegistro | ''
   descricao: string
