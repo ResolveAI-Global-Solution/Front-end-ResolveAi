@@ -66,6 +66,8 @@ export interface OcorrenciaMapa {
   apoios: number
   tempo: string
   posicao: { x: number; y: number }
+  // Latitude/longitude originais da API (a posição no mapa é aproximada e fica presa na borda)
+  coordenadas?: { latitude: number; longitude: number }
   descricao?: string
   // Foto do registro: fica só neste navegador (IndexedDB), a API não guarda fotos
   foto?: Blob
