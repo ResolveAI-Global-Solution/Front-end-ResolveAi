@@ -37,14 +37,14 @@ export default function PainelApoio({ ocorrencia }: { ocorrencia: OcorrenciaMapa
     setErro('')
     setEnviando(true)
     try {
-      await apoiarOcorrencia(ocorrencia.id)
+      await apoiarOcorrencia(ocorrencia)
       // A foto só é guardada depois que a API aceitou o apoio
       if (foto && (await salvarFoto('apoios', ocorrencia.id, foto))) setFotoSalva(foto)
       marcarApoio(ocorrencia.id)
       setApoiou(true)
       setFoto(null)
     } catch (e) {
-      // Mostra a mensagem da API, ex.: "Só quem está a até 500 m do local pode apoiar."
+      // Mostra a mensagem da API, ex.: "Você já apoiou esta ocorrência."
       setErro(e instanceof Error ? e.message : 'Não foi possível registrar o apoio. Tente novamente.')
     } finally {
       setEnviando(false)
@@ -83,7 +83,7 @@ export default function PainelApoio({ ocorrencia }: { ocorrencia: OcorrenciaMapa
             {apoiou ? 'Você também viu' : enviando ? 'Registrando...' : 'Eu também vi'}
           </button>
           <p className="text-xs text-neutral-500">
-            Modo demonstração: você apoia como {USUARIO_DEMO.nome}. Precisamos da sua localização, porque só quem está a até 500 m pode apoiar.
+            Modo demonstração: você apoia como {USUARIO_DEMO.nome}, como se estivesse no local, para dar para testar de qualquer lugar.
           </p>
         </>
       )}

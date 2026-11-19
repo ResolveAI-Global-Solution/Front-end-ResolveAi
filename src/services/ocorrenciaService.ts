@@ -4,7 +4,6 @@ import { categoriasRegistro } from '../data/registro'
 import type { CategoriaOcorrencia, EventoHistorico, OcorrenciaMapa, RegistroOcorrenciaForm, StatusOcorrencia } from '../types'
 import type { HistoricoApi, OcorrenciaApi, StatusApi } from '../types/api'
 import { paraCoordenadas, paraPosicao } from '../utils/coordenadas'
-import { localizacaoAtual } from '../utils/localizacao'
 import { ErroApi, requisitar } from './api'
 import { buscarFoto, buscarFotos, salvarFoto } from './fotosLocais'
 import { validarOcorrencia } from './validarOcorrencia'
@@ -72,6 +71,7 @@ function paraOcorrenciaMapa(dados: OcorrenciaApi): OcorrenciaMapa | null {
     apoios: dados.quantidadeApoios ?? 0,
     tempo: tempoDecorrido(dados.dataRegistro),
     posicao: paraPosicao(dados.latitude, dados.longitude),
+    coordenadas: { latitude: dados.latitude, longitude: dados.longitude },
     criadoEm: dados.dataRegistro,
   }
 }
@@ -157,12 +157,14 @@ export async function buscarOcorrencia(id: number): Promise<OcorrenciaMapa | nul
 }
 
 /**
- * POST /ocorrencias/{id}/apoios ("Eu também vi"), com a localização real do navegador.
- * A API confere as regras (500 m, um apoio por pessoa, autor não apoia) e responde 409 se alguma falhar.
+ * POST /ocorrencias/{id}/apoios ("Eu também vi").
+ * Modo demonstração: em vez da localização real do navegador, manda as coordenadas da própria
+ * ocorrência, para dar para testar de qualquer lugar. A API continua conferindo os 500 m (aqui dá 0 m)
+ * e as outras regras (um apoio por pessoa, autor não apoia), respondendo 409 se alguma falhar.
  */
-export async function apoiarOcorrencia(id: number): Promise<void> {
-  const { latitude, longitude } = await localizacaoAtual()
-  await requisitar(`/ocorrencias/${id}/apoios`, {
+export async function apoiarOcorrencia(ocorrencia: OcorrenciaMapa): Promise<void> {
+  const { latitude, longitude } = ocorrencia.coordenadas ?? paraCoordenadas(ocorrencia.posicao)
+  await requisitar(`/ocorrencias/${ocorrencia.id}/apoios`, {
     method: 'POST',
     body: JSON.stringify({ cdUsuario: USUARIO_DEMO.id, latitude, longitude }),
   })
