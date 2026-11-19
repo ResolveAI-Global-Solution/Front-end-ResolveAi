@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Bug, Construction, Droplet, Grid2X2, Lightbulb, LoaderCircle, Shield, Trash2, TreePine, Waves } from 'lucide-react'
+import { Camera, Construction, Grid2X2, Lightbulb, LoaderCircle, Shield, TreePine, Waves } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { categoriasRegistro, limitesRegistro } from '../../data/registro'
 import useOcorrencias from '../../hooks/useOcorrencias'
@@ -8,7 +8,6 @@ import { posicaoLivre } from '../../utils/posicao'
 import { registrarOcorrencia } from '../../services/ocorrenciaService'
 import { validarOcorrencia } from '../../services/validarOcorrencia'
 import type { CategoriaRegistro, RegistroOcorrenciaErros, RegistroOcorrenciaForm } from '../../types'
-import FotoCampo from './FotoCampo'
 import LocalOcorrencia from './LocalOcorrencia'
 
 type Estado = 'ocioso' | 'enviando' | 'erro'
@@ -18,7 +17,6 @@ const inicial: RegistroOcorrenciaForm = {
   descricao: '',
   endereco: 'Rua Vergueiro, 1200',
   bairro: 'Vila Mariana',
-  foto: null,
   posicao: { x: 50, y: 34 },
 }
 
@@ -26,11 +24,8 @@ const iconesCategoria = {
   buraco: Construction,
   calcada: Grid2X2,
   iluminacao: Lightbulb,
-  poda: TreePine,
-  descarte: Trash2,
-  esgoto: Droplet,
-  alagamento: Waves,
-  pragas: Bug,
+  drenagem: Waves,
+  limpeza: TreePine,
 } satisfies Record<CategoriaRegistro, typeof Construction>
 
 export default function RegistroFormulario() {
@@ -123,12 +118,14 @@ export default function RegistroFormulario() {
           <span>É crime ou emergência? Ligue <a href="tel:190" className="rounded hover:underline focus-visible:outline-2 focus-visible:outline-red-600">190</a>.</span>
         </p>
 
-        <fieldset disabled={enviando} className="mt-6 min-w-0">
-          <legend className="text-lg font-semibold">2. Foto no local</legend>
-          <div className="mt-5">
-            <FotoCampo foto={dados.foto} erro={erros.foto} onAlterar={(foto) => atualizar('foto', foto)} onErro={(mensagem) => setErros((atual) => ({ ...atual, foto: mensagem }))} />
-          </div>
-        </fieldset>
+        {/* A API ainda não guarda fotos: o campo fica reservado, sem fingir o envio (evolução) */}
+        <div className="mt-6 min-w-0">
+          <h2 className="text-lg font-semibold">2. Foto no local</h2>
+          <p className="mt-5 flex items-center gap-3 rounded-lg border border-dashed border-neutral-300 bg-neutral-50 px-4 py-4 text-sm text-neutral-600">
+            <Camera size={20} className="shrink-0" aria-hidden />
+            O envio de foto chega na próxima versão. Por enquanto, descreva bem o problema.
+          </p>
+        </div>
 
         <fieldset disabled={enviando} className="mt-6 min-w-0">
           <legend className="text-lg font-semibold">3. Conte o que você viu</legend>
@@ -150,7 +147,7 @@ export default function RegistroFormulario() {
           {erros.descricao && <p id="erro-registro-descricao" className="mt-1 text-sm text-red-700">{erros.descricao}</p>}
         </fieldset>
 
-        {estado === 'erro' && <p role="alert" className="mt-4 rounded-lg bg-red-50 px-3 py-3 text-sm text-red-700">{mensagemErro} Seus dados foram mantidos. Tente novamente.</p>}
+        {estado === 'erro' && <p role="alert" className="mt-4 rounded-lg bg-red-50 px-3 py-3 text-sm text-red-700">{mensagemErro} Seus dados foram mantidos.</p>}
 
         <div className="mt-6 flex flex-wrap items-center justify-end gap-4">
           <Link to="/mapa" className="inline-flex min-h-12 items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-brand">Cancelar</Link>
