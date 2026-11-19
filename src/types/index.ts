@@ -41,3 +41,12 @@ export interface ContatoForm {
 }
 
 export type ContatoErros = Partial<Record<keyof ContatoForm, string>>
+
+export interface Integrante {
+  rm: string
+  nome: string
+  turma: string
+  curso: string
+  github: string
+  linkedin: string
+}
