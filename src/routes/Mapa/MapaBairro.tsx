@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Plus, X } from 'lucide-react'
+import { Info, Plus, X } from 'lucide-react'
 import type { OcorrenciaMapa, StatusOcorrencia } from '../../types'
 import { statusOcorrencia } from './config'
 import StatusBadge from './StatusBadge'
@@ -26,6 +26,11 @@ export default function MapaBairro({ ocorrencias, selecionada, onSelecionar }: M
         <div className="absolute -left-[5%] top-[62%] h-[1.6%] w-[115%] rotate-[12deg] bg-white" />
         <span className="absolute left-[51%] top-[49%] h-4 w-4 rounded-full border-[3px] border-white bg-brand" />
       </div>
+
+      <p className="absolute right-4 top-4 z-10 inline-flex max-w-[calc(100%-2rem)] items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm md:right-7">
+        <Info size={14} className="shrink-0 text-blue-700" aria-hidden />
+        Mapa ilustrativo: as ruas e posições não são reais
+      </p>
 
       {ocorrencias.map((ocorrencia) => {
         const { Icone, pin, label } = statusOcorrencia[ocorrencia.status]
