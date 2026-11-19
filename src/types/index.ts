@@ -42,9 +42,10 @@ export interface ContatoForm {
 
 export type ContatoErros = Partial<Record<keyof ContatoForm, string>>
 
-export type CategoriaOcorrencia = 'buraco' | 'iluminacao' | 'alagamento'
-export type CategoriaRegistro = CategoriaOcorrencia | 'calcada' | 'poda' | 'descarte' | 'esgoto' | 'pragas'
-export type StatusOcorrencia = 'aberta' | 'confirmada' | 'resolvida' | 'reaberta'
+// As 5 categorias do banco (tb_categoria) + 'outra', para categoria nova criada direto na API
+export type CategoriaOcorrencia = 'buraco' | 'calcada' | 'iluminacao' | 'drenagem' | 'limpeza' | 'outra'
+export type CategoriaRegistro = Exclude<CategoriaOcorrencia, 'outra'>
+export type StatusOcorrencia = 'aberta' | 'confirmada' | 'em_analise' | 'encaminhada' | 'resolvida' | 'reaberta'
 
 export interface EventoHistorico {
   status: StatusOcorrencia
@@ -60,12 +61,13 @@ export interface OcorrenciaMapa {
   titulo: string
   endereco: string
   bairro: string
-  categoria: CategoriaRegistro
+  categoria: CategoriaOcorrencia
   status: StatusOcorrencia
   apoios: number
   tempo: string
   posicao: { x: number; y: number }
   descricao?: string
+  // A API ainda não guarda fotos (evolução): por enquanto estes campos chegam vazios
   foto?: Blob
   fotoDepois?: Blob
   historico?: EventoHistorico[]
@@ -77,7 +79,6 @@ export interface RegistroOcorrenciaForm {
   descricao: string
   endereco: string
   bairro: string
-  foto: File | null
   posicao: { x: number; y: number }
 }
 

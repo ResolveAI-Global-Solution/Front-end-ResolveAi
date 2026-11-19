@@ -1,53 +1,19 @@
-import { ocorrencias } from '../data/mapa'
-import type { EventoHistorico, OcorrenciaMapa, RegistroOcorrenciaForm, StatusOcorrencia } from '../types'
-import { posicaoLivre } from '../utils/posicao'
-import { validarFoto, validarOcorrencia } from './validarOcorrencia'
+import { USUARIO_DEMO } from '../data/demo'
+import { idBairroMapa } from '../data/mapa'
+import { categoriasRegistro } from '../data/registro'
+import type { CategoriaOcorrencia, EventoHistorico, OcorrenciaMapa, RegistroOcorrenciaForm, StatusOcorrencia } from '../types'
+import type { HistoricoApi, OcorrenciaApi, StatusApi } from '../types/api'
+import { paraCoordenadas, paraPosicao } from '../utils/coordenadas'
+import { localizacaoAtual } from '../utils/localizacao'
+import { ErroApi, requisitar } from './api'
+import { validarOcorrencia } from './validarOcorrencia'
+
+// As telas continuam chamando as mesmas funções; só a origem dos dados mudou (navegador -> API Java).
 
 export const EVENTO_OCORRENCIAS_ATUALIZADAS = 'resolveai:ocorrencias-atualizadas'
 
-const NOME_BANCO = 'resolveai'
-const NOME_COLECAO = 'ocorrencias'
-
-// Os registros e as fotos ficam neste navegador até a integração com a API.
-function abrirBanco(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    if (typeof indexedDB === 'undefined') {
-      reject(new Error('Este navegador não permite salvar ocorrências. Use um navegador com armazenamento local disponível.'))
-      return
-    }
-
-    const pedido = indexedDB.open(NOME_BANCO, 1)
-    let encerrado = false
-
-    pedido.onupgradeneeded = () => {
-      if (encerrado) {
-        pedido.transaction?.abort()
-        return
-      }
-      const colecao = pedido.result.createObjectStore(NOME_COLECAO, { keyPath: 'id', autoIncrement: true })
-      ocorrencias.forEach((ocorrencia) => colecao.add(ocorrencia))
-    }
-    pedido.onsuccess = () => {
-      const banco = pedido.result
-      if (encerrado) {
-        banco.close()
-        return
-      }
-      encerrado = true
-      banco.onversionchange = () => banco.close()
-      resolve(banco)
-    }
-    pedido.onerror = () => {
-      if (encerrado) return
-      encerrado = true
-      reject(new Error('Não foi possível abrir as ocorrências salvas. Verifique se o armazenamento do navegador está disponível e tente novamente.'))
-    }
-    pedido.onblocked = () => {
-      if (encerrado) return
-      encerrado = true
-      reject(new Error('O armazenamento está ocupado por outra aba. Feche as outras abas do ResolveAI e tente novamente.'))
-    }
-  })
+function avisarAtualizacao() {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(EVENTO_OCORRENCIAS_ATUALIZADAS))
 }
 
 function tempoDecorrido(criadoEm: string): string {
@@ -65,192 +31,135 @@ function tempoDecorrido(criadoEm: string): string {
   return `há ${dias} ${dias === 1 ? 'dia' : 'dias'}`
 }
 
-export async function listarOcorrencias(): Promise<OcorrenciaMapa[]> {
-  const banco = await abrirBanco()
-  try {
-    const registros = await new Promise<OcorrenciaMapa[]>((resolve, reject) => {
-      const transacao = banco.transaction(NOME_COLECAO, 'readonly')
-      const pedido = transacao.objectStore(NOME_COLECAO).getAll()
-      transacao.oncomplete = () => resolve(pedido.result as OcorrenciaMapa[])
-      transacao.onabort = () => reject(new Error('Não foi possível carregar as ocorrências salvas. Tente novamente.'))
-    })
-    return registros
-      .map((ocorrencia) => ({
-        ...ocorrencia,
-        tempo: ocorrencia.criadoEm ? tempoDecorrido(ocorrencia.criadoEm) : ocorrencia.tempo,
-      }))
-      .sort((a, b) => {
-        if (a.criadoEm && b.criadoEm) return Date.parse(b.criadoEm) - Date.parse(a.criadoEm) || b.id - a.id
-        if (a.criadoEm) return -1
-        if (b.criadoEm) return 1
-        return a.id - b.id
-      })
-  } finally {
-    banco.close()
+// A API usa MAIÚSCULAS; a tela usa minúsculas. REJEITADA não aparece para o morador.
+const statusDaApi: Record<StatusApi, StatusOcorrencia | null> = {
+  ABERTA: 'aberta',
+  CONFIRMADA: 'confirmada',
+  EM_ANALISE: 'em_analise',
+  ENCAMINHADA: 'encaminhada',
+  RESOLVIDA: 'resolvida',
+  REABERTA: 'reaberta',
+  REJEITADA: null,
+}
+
+// Texto do histórico quando a API não manda observação
+const textoPadrao: Record<StatusOcorrencia, string> = {
+  aberta: 'Ocorrência registrada.',
+  confirmada: 'Vizinhos confirmaram o problema.',
+  em_analise: 'A ocorrência está em análise.',
+  encaminhada: 'A ocorrência foi encaminhada.',
+  resolvida: 'Vizinhos confirmaram que o problema foi resolvido.',
+  reaberta: 'O problema voltou e a ocorrência foi reaberta.',
+}
+
+function categoriaDaApi(id: number): CategoriaOcorrencia {
+  return categoriasRegistro.find((categoria) => categoria.id === id)?.valor ?? 'outra'
+}
+
+/** Converte a resposta da API no formato que as telas já usam. Devolve null para REJEITADA. */
+function paraOcorrenciaMapa(dados: OcorrenciaApi): OcorrenciaMapa | null {
+  const status = statusDaApi[dados.status]
+  if (!status) return null
+  return {
+    id: dados.id,
+    titulo: dados.titulo,
+    descricao: dados.descricao ?? undefined,
+    endereco: dados.endereco ?? 'Endereço não informado',
+    bairro: dados.bairro,
+    categoria: categoriaDaApi(dados.categoria.id),
+    status,
+    apoios: dados.quantidadeApoios ?? 0,
+    tempo: tempoDecorrido(dados.dataRegistro),
+    posicao: paraPosicao(dados.latitude, dados.longitude),
+    criadoEm: dados.dataRegistro,
   }
 }
 
+/** Histórico da API -> eventos da linha do tempo, com o mais recente no topo. */
+function paraEventos(historico: HistoricoApi[]): EventoHistorico[] {
+  const eventos: (EventoHistorico & { id: number })[] = []
+  for (const registro of historico) {
+    const status = statusDaApi[registro.status]
+    if (!status) continue
+    eventos.push({ id: registro.id, status, texto: registro.observacao || textoPadrao[status], data: registro.dataStatus })
+  }
+  eventos.sort((a, b) => Date.parse(b.data ?? '') - Date.parse(a.data ?? '') || b.id - a.id)
+  return eventos.map(({ status, texto, data }) => ({ status, texto, data }))
+}
+
+/** GET /ocorrencias?bairro=9: as ocorrências do bairro do mapa, das mais novas para as mais antigas. */
+export async function listarOcorrencias(): Promise<OcorrenciaMapa[]> {
+  const lista = await requisitar<OcorrenciaApi[]>(`/ocorrencias?bairro=${idBairroMapa}`)
+  return lista
+    .map(paraOcorrenciaMapa)
+    .filter((ocorrencia): ocorrencia is OcorrenciaMapa => ocorrencia !== null)
+    .sort((a, b) => Date.parse(b.criadoEm ?? '') - Date.parse(a.criadoEm ?? '') || b.id - a.id)
+}
+
+/** POST /ocorrencias, como o morador de demonstração. A posição do pin vira latitude/longitude. */
 export async function registrarOcorrencia(dados: RegistroOcorrenciaForm): Promise<OcorrenciaMapa> {
-  if (Object.keys(validarOcorrencia(dados)).length > 0 || !dados.categoria || !dados.foto) {
+  const categoria = categoriasRegistro.find(({ valor }) => valor === dados.categoria)
+  if (Object.keys(validarOcorrencia(dados)).length > 0 || !categoria) {
     throw new Error('Confira os campos da ocorrência antes de continuar.')
   }
 
   const descricao = dados.descricao.trim()
-  const nova: Omit<OcorrenciaMapa, 'id'> = {
-    titulo: descricao.length > 100 ? `${descricao.slice(0, 99)}…` : descricao,
-    descricao,
-    endereco: dados.endereco.trim(),
-    bairro: dados.bairro.trim(),
-    categoria: dados.categoria,
-    status: 'aberta',
-    apoios: 0,
-    tempo: 'agora',
-    foto: dados.foto,
-    criadoEm: new Date().toISOString(),
-    posicao: { ...dados.posicao },
-  }
+  const { latitude, longitude } = paraCoordenadas(dados.posicao)
+  const criada = await requisitar<OcorrenciaApi>('/ocorrencias', {
+    method: 'POST',
+    body: JSON.stringify({
+      cdUsuario: USUARIO_DEMO.id,
+      cdCategoria: categoria.id,
+      cdBairro: idBairroMapa,
+      titulo: descricao.length > 100 ? `${descricao.slice(0, 99)}…` : descricao,
+      descricao,
+      endereco: dados.endereco.trim(),
+      latitude,
+      longitude,
+    }),
+  })
 
-  const banco = await abrirBanco()
-  let registrada: OcorrenciaMapa
-  try {
-    registrada = await new Promise<OcorrenciaMapa>((resolve, reject) => {
-      const transacao = banco.transaction(NOME_COLECAO, 'readwrite')
-      const colecao = transacao.objectStore(NOME_COLECAO)
-      let pedido: IDBRequest<IDBValidKey>
-      // Lê e grava na mesma transação: se o pin cair em cima de outro, vai para o ponto livre mais próximo
-      const existentes = colecao.getAll()
-      existentes.onsuccess = () => {
-        const ocupadas = (existentes.result as OcorrenciaMapa[]).map(({ posicao }) => posicao)
-        nova.posicao = posicaoLivre(nova.posicao, ocupadas)
-        pedido = colecao.add(nova)
-      }
-      transacao.oncomplete = () => resolve({ ...nova, id: pedido.result as number })
-      transacao.onabort = () => {
-        const mensagem = transacao.error?.name === 'QuotaExceededError'
-          ? 'Não há espaço para salvar esta ocorrência. Libere espaço no navegador e tente novamente.'
-          : 'Não foi possível salvar a ocorrência neste navegador. Seus dados não foram publicados. Tente novamente.'
-        reject(new Error(mensagem))
-      }
-    })
-  } finally {
-    banco.close()
-  }
-
-  if (typeof window !== 'undefined') window.dispatchEvent(new Event(EVENTO_OCORRENCIAS_ATUALIZADAS))
-  return registrada
+  avisarAtualizacao()
+  const ocorrencia = paraOcorrenciaMapa(criada)
+  if (!ocorrencia) throw new Error('A ocorrência foi registrada, mas não pôde ser exibida.')
+  return ocorrencia
 }
 
-// Ocorrências antigas e as de exemplo não têm histórico salvo: monta um a partir do status atual
 export function historicoDaOcorrencia(ocorrencia: OcorrenciaMapa): EventoHistorico[] {
-  if (ocorrencia.historico) return ocorrencia.historico
-
-  const eventos: EventoHistorico[] = [
-    { status: 'aberta', texto: 'Ocorrência registrada com foto no local.', data: ocorrencia.criadoEm },
-  ]
-  if (ocorrencia.status === 'confirmada') eventos.push({ status: 'confirmada', texto: 'Vizinhos confirmaram o problema.' })
-  if (ocorrencia.status === 'resolvida') eventos.push({ status: 'resolvida', texto: 'Vizinhos confirmaram que o problema foi resolvido.' })
-  if (ocorrencia.status === 'reaberta') eventos.push({ status: 'reaberta', texto: 'O problema voltou e a ocorrência foi reaberta.' })
-  return eventos
+  return ocorrencia.historico ?? []
 }
 
+/** GET /ocorrencias/{id} + /historico. Devolve null se a ocorrência não existe (404) ou foi rejeitada. */
 export async function buscarOcorrencia(id: number): Promise<OcorrenciaMapa | null> {
-  const banco = await abrirBanco()
   try {
-    const registro = await new Promise<OcorrenciaMapa | undefined>((resolve, reject) => {
-      const transacao = banco.transaction(NOME_COLECAO, 'readonly')
-      const pedido = transacao.objectStore(NOME_COLECAO).get(id)
-      transacao.oncomplete = () => resolve(pedido.result as OcorrenciaMapa | undefined)
-      transacao.onabort = () => reject(new Error('Não foi possível carregar a ocorrência. Tente novamente.'))
-    })
-    if (!registro) return null
-    return { ...registro, tempo: registro.criadoEm ? tempoDecorrido(registro.criadoEm) : registro.tempo }
-  } finally {
-    banco.close()
+    const [dados, historico] = await Promise.all([
+      requisitar<OcorrenciaApi>(`/ocorrencias/${id}`),
+      requisitar<HistoricoApi[]>(`/ocorrencias/${id}/historico`),
+    ])
+    const ocorrencia = paraOcorrenciaMapa(dados)
+    return ocorrencia ? { ...ocorrencia, historico: paraEventos(historico) } : null
+  } catch (erro) {
+    if (erro instanceof ErroApi && erro.status === 404) return null
+    throw erro
   }
 }
 
-// Lê, altera e grava na mesma transação, para duas abas não sobrescreverem a mudança uma da outra
-async function alterarOcorrencia(id: number, alterar: (atual: OcorrenciaMapa) => OcorrenciaMapa): Promise<OcorrenciaMapa> {
-  const banco = await abrirBanco()
-  let alterada: OcorrenciaMapa | undefined
-  let erroRegra: Error | undefined
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const transacao = banco.transaction(NOME_COLECAO, 'readwrite')
-      const colecao = transacao.objectStore(NOME_COLECAO)
-      const pedido = colecao.get(id)
-      pedido.onsuccess = () => {
-        const atual = pedido.result as OcorrenciaMapa | undefined
-        if (!atual) {
-          erroRegra = new Error('Esta ocorrência não existe mais.')
-          transacao.abort()
-          return
-        }
-        try {
-          alterada = alterar({ ...atual, historico: historicoDaOcorrencia(atual) })
-          colecao.put(alterada)
-        } catch (erro) {
-          erroRegra = erro instanceof Error ? erro : new Error('Não foi possível atualizar a ocorrência.')
-          transacao.abort()
-        }
-      }
-      transacao.oncomplete = () => resolve()
-      transacao.onabort = () => reject(erroRegra ?? new Error('Não foi possível atualizar a ocorrência neste navegador. Tente novamente.'))
-    })
-  } finally {
-    banco.close()
-  }
-
-  if (typeof window !== 'undefined') window.dispatchEvent(new Event(EVENTO_OCORRENCIAS_ATUALIZADAS))
-  return alterada!
-}
-
-function comEvento(ocorrencia: OcorrenciaMapa, status: StatusOcorrencia, texto: string, comFotos = false): OcorrenciaMapa {
-  const evento: EventoHistorico = { status, texto, data: new Date().toISOString(), ...(comFotos && { comFotos }) }
-  // O evento mais recente fica no topo da linha do tempo
-  return { ...ocorrencia, status, historico: [evento, ...(ocorrencia.historico ?? [])] }
-}
-
-// Com duas ou mais pessoas vendo o problema, a ocorrência aberta passa a confirmada
-const APOIOS_PARA_CONFIRMAR = 2
-
-export function apoiarOcorrencia(id: number) {
-  return alterarOcorrencia(id, (atual) => {
-    const apoiada = { ...atual, apoios: atual.apoios + 1 }
-    if (atual.status === 'aberta' && apoiada.apoios >= APOIOS_PARA_CONFIRMAR) {
-      return comEvento(apoiada, 'confirmada', 'Vizinhos confirmaram o problema.')
-    }
-    return apoiada
+/**
+ * POST /ocorrencias/{id}/apoios ("Eu também vi"), com a localização real do navegador.
+ * A API confere as regras (500 m, um apoio por pessoa, autor não apoia) e responde 409 se alguma falhar.
+ */
+export async function apoiarOcorrencia(id: number): Promise<void> {
+  const { latitude, longitude } = await localizacaoAtual()
+  await requisitar(`/ocorrencias/${id}/apoios`, {
+    method: 'POST',
+    body: JSON.stringify({ cdUsuario: USUARIO_DEMO.id, latitude, longitude }),
   })
+  avisarAtualizacao()
 }
 
-export function enviarFotoDepois(id: number, foto: File) {
-  const erroFoto = validarFoto(foto)
-  if (erroFoto) return Promise.reject(new Error(erroFoto))
-
-  return alterarOcorrencia(id, (atual) => {
-    if (atual.status === 'resolvida') throw new Error('Esta ocorrência já foi resolvida.')
-    return comEvento({ ...atual, fotoDepois: foto }, atual.status, 'Foto do depois enviada. Aguardando confirmação.', true)
-  })
-}
-
-export function confirmarResolucao(id: number) {
-  return alterarOcorrencia(id, (atual) => {
-    if (!atual.fotoDepois) throw new Error('Envie a foto do depois antes de confirmar a resolução.')
-    return comEvento(atual, 'resolvida', 'Vizinhos confirmaram que o problema foi resolvido.')
-  })
-}
-
-export function contestarResolucao(id: number) {
-  return alterarOcorrencia(id, (atual) => {
-    if (!atual.fotoDepois) throw new Error('Não há resolução para contestar.')
-    // A foto do depois sai: quem resolver de novo envia uma nova
-    return comEvento({ ...atual, fotoDepois: undefined }, 'reaberta', 'Um vizinho contestou: o problema continua no local.')
-  })
-}
-
-// Guarda neste navegador quais ocorrências a pessoa já apoiou, para não apoiar duas vezes
-const CHAVE_APOIOS = 'resolveai:apoios'
+// Guarda neste navegador quais ocorrências já foram apoiadas, só para o botão já abrir marcado.
+// Quem garante "um apoio por pessoa" de verdade é a API (409).
+const CHAVE_APOIOS = 'resolveai:apoios-api'
 
 function lerApoiadas(): number[] {
   try {
