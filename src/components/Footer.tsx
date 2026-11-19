@@ -2,10 +2,10 @@ import { Link } from 'react-router-dom'
 import { links } from '../data/home'
 import Logo from './Logo.tsx'
 
-export default function Footer() {
+export default function Footer({ amplo = false }: { amplo?: boolean }) {
   return (
     <footer className="bg-brand text-white">
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <div className={`mx-auto px-4 py-10 sm:px-6 ${amplo ? 'max-w-7xl lg:px-10' : 'max-w-6xl'}`}>
         <div className="flex flex-col gap-6 md:flex-row md:justify-between">
           <div>
             <Logo variante="footer" />
