@@ -4,23 +4,23 @@ import { Menu, X } from 'lucide-react'
 import { links } from '../data/home'
 import Logo from './Logo.tsx'
 
-export default function Navbar() {
+export default function Navbar({ amplo = false }: { amplo?: boolean }) {
   const [aberto, setAberto] = useState(false)
 
   return (
     <header className="sticky top-0 z-20 border-b border-neutral-200 bg-white">
-      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
+      <div className={`mx-auto flex items-center justify-between px-4 sm:px-6 ${amplo ? 'h-18 max-w-7xl lg:px-10' : 'h-16 max-w-5xl'}`}>
         <Link to="/" aria-label="ResolveAI, página inicial">
           <Logo />
         </Link>
 
-        <nav className="hidden items-center gap-7 text-sm font-medium lg:flex" aria-label="Principal">
+        <nav className={`hidden items-center font-medium lg:flex ${amplo ? 'gap-8 text-base' : 'gap-7 text-sm'}`} aria-label="Principal">
           {links.map((l) => (
             <NavLink
               key={l.to}
               to={l.to}
               end={l.to === '/'}
-              className={({ isActive }) => (isActive ? 'text-brand' : 'text-neutral-900 hover:text-brand')}
+              className={({ isActive }) => (isActive || (amplo && l.to === '/mapa') ? 'text-brand' : 'text-neutral-900 hover:text-brand')}
             >
               {l.label}
             </NavLink>
@@ -29,7 +29,7 @@ export default function Navbar() {
 
         <Link
           to="/registrar"
-          className="hidden rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 lg:inline-block"
+          className={`hidden rounded-lg bg-brand font-semibold text-white hover:bg-blue-700 lg:inline-block ${amplo ? 'px-5 py-3 text-base' : 'px-4 py-2.5 text-sm'}`}
         >
           Registrar ocorrência
         </Link>
@@ -54,7 +54,7 @@ export default function Navbar() {
               end={l.to === '/'}
               onClick={() => setAberto(false)}
               className={({ isActive }) =>
-                `rounded-lg px-3 py-2.5 text-sm font-medium ${isActive ? 'bg-brand-soft text-brand' : 'text-neutral-900'}`
+                `rounded-lg px-3 py-2.5 text-sm font-medium ${isActive || (amplo && l.to === '/mapa') ? 'bg-brand-soft text-brand' : 'text-neutral-900'}`
               }
             >
               {l.label}

@@ -42,6 +42,35 @@ export interface ContatoForm {
 
 export type ContatoErros = Partial<Record<keyof ContatoForm, string>>
 
+export type CategoriaOcorrencia = 'buraco' | 'iluminacao' | 'alagamento'
+export type CategoriaRegistro = CategoriaOcorrencia | 'calcada' | 'poda' | 'descarte' | 'esgoto' | 'pragas'
+export type StatusOcorrencia = 'aberta' | 'confirmada' | 'resolvida' | 'reaberta'
+
+export interface OcorrenciaMapa {
+  id: number
+  titulo: string
+  endereco: string
+  bairro: string
+  categoria: CategoriaRegistro
+  status: StatusOcorrencia
+  apoios: number
+  tempo: string
+  posicao: { x: number; y: number }
+  descricao?: string
+  foto?: Blob
+  criadoEm?: string
+}
+
+export interface RegistroOcorrenciaForm {
+  categoria: CategoriaRegistro | ''
+  descricao: string
+  endereco: string
+  bairro: string
+  foto: File | null
+  posicao: { x: number; y: number }
+}
+
+export type RegistroOcorrenciaErros = Partial<Record<keyof RegistroOcorrenciaForm, string>>
 export interface PerguntaFaq {
   pergunta: string
   resposta: string
