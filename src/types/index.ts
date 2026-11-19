@@ -46,6 +46,15 @@ export type CategoriaOcorrencia = 'buraco' | 'iluminacao' | 'alagamento'
 export type CategoriaRegistro = CategoriaOcorrencia | 'calcada' | 'poda' | 'descarte' | 'esgoto' | 'pragas'
 export type StatusOcorrencia = 'aberta' | 'confirmada' | 'resolvida' | 'reaberta'
 
+export interface EventoHistorico {
+  status: StatusOcorrencia
+  texto: string
+  // Data ISO; os registros de exemplo não têm data e mostram só o texto
+  data?: string
+  // Mostra as miniaturas de antes e depois no evento
+  comFotos?: boolean
+}
+
 export interface OcorrenciaMapa {
   id: number
   titulo: string
@@ -58,6 +67,8 @@ export interface OcorrenciaMapa {
   posicao: { x: number; y: number }
   descricao?: string
   foto?: Blob
+  fotoDepois?: Blob
+  historico?: EventoHistorico[]
   criadoEm?: string
 }
 
