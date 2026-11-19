@@ -71,3 +71,17 @@ export interface RegistroOcorrenciaForm {
 }
 
 export type RegistroOcorrenciaErros = Partial<Record<keyof RegistroOcorrenciaForm, string>>
+export interface PerguntaFaq {
+  pergunta: string
+  resposta: string
+}
+
+export interface Integrante {
+  rm: string
+  nome: string
+  turma: string
+  curso: string
+  foto: string
+  github: string
+  linkedin: string
+}
