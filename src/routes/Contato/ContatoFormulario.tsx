@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { ChevronDown, Send } from 'lucide-react'
-import { assuntos } from '../../../data/contato'
-import { enviarContato } from '../../../services/contatoService'
-import type { ContatoErros, ContatoForm } from '../../../types'
+import { assuntos } from '../../data/contato'
+import { enviarContato } from '../../services/contatoService'
+import type { ContatoErros, ContatoForm } from '../../types'
 
 type Estado = 'ocioso' | 'enviando' | 'sucesso' | 'erro'
 

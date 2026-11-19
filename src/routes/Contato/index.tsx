@@ -1,4 +1,4 @@
-import ContatoFormulario from './components/ContatoFormulario'
+import ContatoFormulario from './ContatoFormulario'
 
 export default function Contato() {
   return (

@@ -1,4 +1,4 @@
-import type { Ods } from '../../../types'
+import type { Ods } from '../../types'
 
 export default function OdsCard({ numero, titulo, descricao }: Ods) {
   return (

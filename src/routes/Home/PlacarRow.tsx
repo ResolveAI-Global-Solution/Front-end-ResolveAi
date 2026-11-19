@@ -1,4 +1,4 @@
-import type { PlacarItem } from '../../../types'
+import type { PlacarItem } from '../../types'
 
 export default function PlacarRow({ posicao, nome, resolvidoPct, diasMedia, porMilHab }: PlacarItem) {
   return (
