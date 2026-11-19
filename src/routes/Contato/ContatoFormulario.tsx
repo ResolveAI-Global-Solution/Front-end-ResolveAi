@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { ChevronDown, Send } from 'lucide-react'
+import { ChevronDown, Send, XCircle } from 'lucide-react'
 import { assuntos } from '../../data/contato'
 import { enviarContato } from '../../services/contatoService'
 import type { ContatoErros, ContatoForm } from '../../types'
@@ -15,7 +15,7 @@ const base =
 function validar(d: ContatoForm): ContatoErros {
   const erros: ContatoErros = {}
   if (d.nome.trim().length < 2) erros.nome = 'Informe seu nome.'
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) erros.email = 'Informe um e-mail válido.'
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) erros.email = 'Digite um e-mail válido, como nome@email.com.'
   if (!d.assunto) erros.assunto = 'Selecione um assunto.'
   if (d.mensagem.trim().length < 10) erros.mensagem = 'Escreva pelo menos 10 caracteres.'
   return erros
@@ -49,9 +49,20 @@ export default function ContatoFormulario() {
   }
 
   const borda = (campo: keyof ContatoForm) => (erros[campo] ? 'border-red-600' : 'border-neutral-300')
+  
+  const temErros = Object.values(erros).some(Boolean)
 
   return (
     <form onSubmit={enviar} noValidate className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+      {temErros && (
+        <p
+          role="alert"
+          className="mb-4 flex items-center gap-2 rounded-lg bg-red-100 px-3 py-3 text-xs font-semibold text-red-700"
+        >
+          <XCircle size={16} aria-hidden />
+          Confira os campos destacados.
+        </p>
+  )}
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="nome" className="text-xs font-semibold">Nome</label>
