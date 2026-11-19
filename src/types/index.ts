@@ -42,6 +42,11 @@ export interface ContatoForm {
 
 export type ContatoErros = Partial<Record<keyof ContatoForm, string>>
 
+export interface PerguntaFaq {
+  pergunta: string
+  resposta: string
+}
+
 export interface Integrante {
   rm: string
   nome: string
