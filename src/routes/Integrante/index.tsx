@@ -2,6 +2,7 @@ import { ChevronRight, Link2 } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import Avatar from '../../components/Avatar'
 import { integrantes } from '../../data/integrantes'
+import { useTituloPagina } from '../../hooks/useTituloPagina'
 import Placeholder from '../Placeholder'
 
 const botao =
@@ -11,6 +12,9 @@ export default function Integrante() {
   // O :id da rota é o RM do integrante: /integrantes/569898
   const { id } = useParams()
   const integrante = integrantes.find((i) => i.rm === id)
+
+  // O hook vem antes do return antecipado: hooks não podem ser chamados de forma condicional
+  useTituloPagina(integrante?.nome ?? 'Integrante não encontrado')
 
   if (!integrante) return <Placeholder titulo="Integrante não encontrado" />
 
