@@ -6,7 +6,7 @@ import StatusBadge from '../../components/ocorrencia/StatusBadge'
 import useOcorrencia from '../../hooks/useOcorrencia'
 import { useTituloPagina } from '../../hooks/useTituloPagina'
 import { historicoDaOcorrencia } from '../../services/ocorrenciaService'
-import Placeholder from '../Placeholder'
+import NaoEncontrada from '../NaoEncontrada'
 import FotosAntesDepois from './FotosAntesDepois'
 import Historico from './Historico'
 import PainelApoio from './PainelApoio'
@@ -26,9 +26,19 @@ export default function Ocorrencia() {
   const { ocorrencia, estado, tentarNovamente } = useOcorrencia(Number(id))
   const [denunciada, setDenunciada] = useState(false)
 
-  useTituloPagina(ocorrencia ? ocorrencia.titulo : 'Detalhe da ocorrência')
+  useTituloPagina(
+    estado === 'nao-encontrada' ? 'Ocorrência não encontrada' : ocorrencia ? ocorrencia.titulo : 'Detalhe da ocorrência',
+  )
 
-  if (estado === 'nao-encontrada') return <Placeholder titulo="Ocorrência não encontrada" />
+  if (estado === 'nao-encontrada') {
+    return (
+      <NaoEncontrada
+        titulo="Ocorrência não encontrada"
+        texto="Essa ocorrência não existe ou foi removida."
+        voltarPara={{ para: '/mapa', rotulo: 'Ver mapa de ocorrências' }}
+      />
+    )
+  }
 
   if (estado === 'erro') {
     return (

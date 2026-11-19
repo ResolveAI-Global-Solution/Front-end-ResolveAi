@@ -12,7 +12,7 @@ import Integrante from './routes/Integrante'
 import Faq from './routes/Faq'
 import Ocorrencia from './routes/Ocorrencia'
 import Placar from './routes/Placar'
-import Placeholder from './routes/Placeholder'
+import NaoEncontrada from './routes/NaoEncontrada'
 import './index.css'
 
 const router = createBrowserRouter([
@@ -31,7 +31,7 @@ const router = createBrowserRouter([
       { path: '/registrar', element: <Registrar /> },
       // Rota dinâmica (requisito 02): /ocorrencias/123
       { path: '/ocorrencias/:id', element: <Ocorrencia /> },
-      { path: '*', element: <Placeholder titulo="Página não encontrada" /> },
+      { path: '*', element: <NaoEncontrada /> },
     ],
   },
 ])
