@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 import { Info, Plus, X } from 'lucide-react'
 import type { OcorrenciaMapa, StatusOcorrencia } from '../../types'
-import { statusOcorrencia } from './config'
-import StatusBadge from './StatusBadge'
-import FotoOcorrencia from './FotoOcorrencia'
+import { statusOcorrencia } from '../../components/ocorrencia/config'
+import StatusBadge from '../../components/ocorrencia/StatusBadge'
+import FotoOcorrencia from '../../components/ocorrencia/FotoOcorrencia'
 
 interface MapaBairroProps {
   ocorrencias: OcorrenciaMapa[]

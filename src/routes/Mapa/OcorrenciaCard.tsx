@@ -1,8 +1,8 @@
 import { Eye, Image } from 'lucide-react'
 import type { OcorrenciaMapa } from '../../types'
-import { categorias } from './config'
-import FotoOcorrencia from './FotoOcorrencia'
-import StatusBadge from './StatusBadge'
+import { categorias } from '../../components/ocorrencia/config'
+import FotoOcorrencia from '../../components/ocorrencia/FotoOcorrencia'
+import StatusBadge from '../../components/ocorrencia/StatusBadge'
 
 interface OcorrenciaCardProps {
   ocorrencia: OcorrenciaMapa
