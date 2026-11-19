@@ -2,10 +2,10 @@ import { Link } from 'react-router-dom'
 import Avatar from '../../components/Avatar'
 import type { Integrante } from '../../types'
 
-export default function IntegranteCard({ rm, nome, turma }: Integrante) {
+export default function IntegranteCard({ rm, nome, turma, foto }: Integrante) {
   return (
     <article className="flex flex-col items-center gap-4 rounded-xl border border-neutral-200 p-6 text-center">
-      <Avatar nome={nome} />
+      <Avatar nome={nome} foto={foto} />
       <h2 className="text-lg font-semibold">{nome}</h2>
       <p className="text-sm text-neutral-500">
         RM {rm} · {turma}

@@ -47,6 +47,7 @@ export interface Integrante {
   nome: string
   turma: string
   curso: string
+  foto: string
   github: string
   linkedin: string
 }

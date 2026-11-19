@@ -1,11 +1,6 @@
 interface AvatarProps {
   nome: string
-  tamanho?: 'md' | 'lg'
-}
-
-const tamanhos = {
-  md: 'size-20 text-[22px]',
-  lg: 'size-28 text-3xl sm:size-40 sm:text-[40px]',
+  foto?: string
 }
 
 // Iniciais do primeiro e do último nome: "Luiz Felipe Lourenço da Silva" -> "LS"
@@ -16,12 +11,16 @@ function iniciais(nome: string) {
   return (primeira + ultima).toUpperCase()
 }
 
-export default function Avatar({ nome, tamanho = 'md' }: AvatarProps) {
+const base = 'size-24 shrink-0 rounded-full'
+
+// Mostra a foto; sem foto, cai para o círculo com as iniciais
+export default function Avatar({ nome, foto }: AvatarProps) {
+  if (foto) {
+    return <img src={foto} alt={`Foto de ${nome}`} className={`${base} object-cover object-top ring-4 ring-brand-soft`} />
+  }
+
   return (
-    <span
-      className={`flex shrink-0 items-center justify-center rounded-full bg-brand font-semibold text-white ${tamanhos[tamanho]}`}
-      aria-hidden
-    >
+    <span className={`${base} flex items-center justify-center bg-brand text-2xl font-semibold text-white`} aria-hidden>
       {iniciais(nome)}
     </span>
   )

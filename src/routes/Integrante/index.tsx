@@ -1,6 +1,5 @@
 import { ChevronRight, Link2 } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
-import Avatar from '../../components/Avatar'
 import { integrantes } from '../../data/integrantes'
 import { useTituloPagina } from '../../hooks/useTituloPagina'
 import Placeholder from '../Placeholder'
@@ -18,10 +17,17 @@ export default function Integrante() {
 
   if (!integrante) return <Placeholder titulo="Integrante não encontrado" />
 
-  const { rm, nome, turma, curso, github, linkedin } = integrante
+  const { rm, nome, turma, curso, foto, github, linkedin } = integrante
+
+  const dados = [
+    { rotulo: 'RM', valor: rm },
+    { rotulo: 'Turma', valor: turma },
+    { rotulo: 'Curso', valor: curso },
+    { rotulo: 'Equipe', valor: 'HalfTech · FIAP' },
+  ]
 
   return (
-    <section className="mx-auto max-w-6xl px-4 pt-10 pb-16 sm:px-6 lg:pt-16 lg:pb-24">
+    <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
       <nav aria-label="Trilha de navegação" className="flex items-center gap-2 text-sm">
         <Link to="/integrantes" className="font-semibold text-brand hover:underline">
           Integrantes
@@ -32,14 +38,27 @@ export default function Integrante() {
         </span>
       </nav>
 
-      <div className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-12">
-        <Avatar nome={nome} tamanho="lg" />
-        <div className="flex flex-col gap-3">
-          <h1 className="text-3xl font-semibold sm:text-4xl">{nome}</h1>
-          <p className="text-lg font-semibold text-neutral-500">
-            RM {rm} · Turma {turma} · {curso}
-          </p>
-          <div className="flex flex-wrap gap-3">
+      <div className="mt-6 grid items-center gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-12">
+        <img
+          src={foto}
+          alt={`Foto de ${nome}`}
+          className="aspect-4/5 w-full max-w-sm justify-self-center rounded-2xl object-cover object-top shadow-lg md:max-w-none"
+        />
+
+        <div>
+          <p className="text-sm font-semibold text-brand">Integrante HalfTech</p>
+          <h1 className="mt-2 text-3xl font-semibold sm:text-4xl lg:text-5xl">{nome}</h1>
+
+          <dl className="mt-6 grid gap-3 sm:grid-cols-2">
+            {dados.map(({ rotulo, valor }) => (
+              <div key={rotulo} className="rounded-xl bg-neutral-100 px-4 py-3">
+                <dt className="text-xs font-medium text-neutral-500">{rotulo}</dt>
+                <dd className="mt-0.5 font-semibold">{valor}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <div className="mt-6 flex flex-wrap gap-3">
             <a href={`https://github.com/${github}`} target="_blank" rel="noreferrer" className={botao}>
               <Link2 size={20} aria-hidden />
               GitHub · {github}
@@ -50,13 +69,6 @@ export default function Integrante() {
             </a>
           </div>
         </div>
-      </div>
-
-      <div className="mt-8 rounded-xl bg-neutral-100 p-4">
-        <p className="text-xs font-medium text-neutral-500">Rota com parâmetro</p>
-        <p className="mt-1 text-neutral-700">
-          /integrantes/:id → a página lê o RM na URL e mostra os dados do integrante.
-        </p>
       </div>
     </section>
   )

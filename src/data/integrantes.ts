@@ -1,4 +1,8 @@
 import type { Integrante } from '../types'
+import fotoAndrei from '../assets/images/integrantes/andrei.jpg'
+import fotoFelipe from '../assets/images/integrantes/felipe.jpg'
+import fotoHenrique from '../assets/images/integrantes/henrique.jpg'
+import fotoLuiz from '../assets/images/integrantes/luiz.jpg'
 
 const curso = 'Análise e Desenvolvimento de Sistemas'
 
@@ -9,6 +13,7 @@ export const integrantes: Integrante[] = [
     nome: 'Andrei Oliveira de Sousa',
     turma: '1TDSPW',
     curso,
+    foto: fotoAndrei,
     github: 'andreisou-dev',
     linkedin: 'andrei-sousa-55662825a',
   },
@@ -17,6 +22,7 @@ export const integrantes: Integrante[] = [
     nome: 'Felipe Coelho da Fonseca',
     turma: '1TDSPW',
     curso,
+    foto: fotoFelipe,
     github: 'devfcoelho',
     linkedin: 'felipe-coelho-80b78a394',
   },
@@ -25,6 +31,7 @@ export const integrantes: Integrante[] = [
     nome: 'Henrique Soares Pereira',
     turma: '1TDSPW',
     curso,
+    foto: fotoHenrique,
     github: 'Henriquesope',
     linkedin: 'henrique-soares-pereira',
   },
@@ -33,6 +40,7 @@ export const integrantes: Integrante[] = [
     nome: 'Luiz Felipe Lourenço da Silva',
     turma: '1TDSPW',
     curso,
+    foto: fotoLuiz,
     github: 'devlipee',
     linkedin: 'lfelipelourenco',
   },
