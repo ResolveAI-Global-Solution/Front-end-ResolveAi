@@ -1,5 +1,6 @@
 import { ocorrencias } from '../data/mapa'
 import type { OcorrenciaMapa, RegistroOcorrenciaForm } from '../types'
+import { posicaoLivre } from '../utils/posicao'
 import { validarOcorrencia } from './validarOcorrencia'
 
 export const EVENTO_OCORRENCIAS_ATUALIZADAS = 'resolveai:ocorrencias-atualizadas'
@@ -114,7 +115,15 @@ export async function registrarOcorrencia(dados: RegistroOcorrenciaForm): Promis
   try {
     registrada = await new Promise<OcorrenciaMapa>((resolve, reject) => {
       const transacao = banco.transaction(NOME_COLECAO, 'readwrite')
-      const pedido = transacao.objectStore(NOME_COLECAO).add(nova)
+      const colecao = transacao.objectStore(NOME_COLECAO)
+      let pedido: IDBRequest<IDBValidKey>
+      // Lê e grava na mesma transação: se o pin cair em cima de outro, vai para o ponto livre mais próximo
+      const existentes = colecao.getAll()
+      existentes.onsuccess = () => {
+        const ocupadas = (existentes.result as OcorrenciaMapa[]).map(({ posicao }) => posicao)
+        nova.posicao = posicaoLivre(nova.posicao, ocupadas)
+        pedido = colecao.add(nova)
+      }
       transacao.oncomplete = () => resolve({ ...nova, id: pedido.result as number })
       transacao.onabort = () => {
         const mensagem = transacao.error?.name === 'QuotaExceededError'

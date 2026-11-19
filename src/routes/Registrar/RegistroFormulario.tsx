@@ -1,8 +1,10 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Bug, Construction, Droplet, Grid2X2, Lightbulb, LoaderCircle, Shield, Trash2, TreePine, Waves } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { categoriasRegistro, limitesRegistro } from '../../data/registro'
+import useOcorrencias from '../../hooks/useOcorrencias'
+import { posicaoLivre } from '../../utils/posicao'
 import { registrarOcorrencia } from '../../services/ocorrenciaService'
 import { validarOcorrencia } from '../../services/validarOcorrencia'
 import type { CategoriaRegistro, RegistroOcorrenciaErros, RegistroOcorrenciaForm } from '../../types'
@@ -37,10 +39,20 @@ export default function RegistroFormulario() {
   const [estado, setEstado] = useState<Estado>('ocioso')
   const [mensagemErro, setMensagemErro] = useState('')
   const enviandoRef = useRef(false)
+  const pinMovidoRef = useRef(false)
   const navigate = useNavigate()
   const enviando = estado === 'enviando'
+  const { ocorrencias, estado: estadoOcorrencias } = useOcorrencias()
+
+  // Quando as ocorrências carregam, tira o pin de cima de outro, a menos que a pessoa já tenha movido
+  useEffect(() => {
+    if (estadoOcorrencias !== 'pronto' || pinMovidoRef.current) return
+    const ocupadas = ocorrencias.map(({ posicao }) => posicao)
+    setDados((atual) => ({ ...atual, posicao: posicaoLivre(atual.posicao, ocupadas) }))
+  }, [ocorrencias, estadoOcorrencias])
 
   function atualizar<K extends keyof RegistroOcorrenciaForm>(campo: K, valor: RegistroOcorrenciaForm[K]) {
+    if (campo === 'posicao') pinMovidoRef.current = true
     setDados((atual) => ({ ...atual, [campo]: valor }))
     setErros((atual) => ({ ...atual, [campo]: undefined }))
     if (estado === 'erro') setEstado('ocioso')
