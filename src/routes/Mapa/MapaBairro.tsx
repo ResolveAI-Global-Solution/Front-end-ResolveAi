@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
-import { Plus } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import type { OcorrenciaMapa, StatusOcorrencia } from '../../types'
 import { statusOcorrencia } from './config'
 import StatusBadge from './StatusBadge'
+import FotoOcorrencia from './FotoOcorrencia'
 
 interface MapaBairroProps {
   ocorrencias: OcorrenciaMapa[]
@@ -14,7 +15,7 @@ export default function MapaBairro({ ocorrencias, selecionada, onSelecionar }: M
   const ocorrenciaSelecionada = ocorrencias.find(({ id }) => id === selecionada)
 
   return (
-    <section className="relative min-h-[400px] flex-1 overflow-hidden bg-[#e8edf3] md:min-h-0" aria-label="Mapa ilustrativo de ocorrências da Vila Mariana">
+    <section className="relative min-h-[400px] flex-1 overflow-hidden bg-[#e8edf3] md:min-h-0" aria-label="Mapa ilustrativo de ocorrências do bairro">
       <div className="pointer-events-none absolute inset-0" aria-hidden>
         <div className="absolute left-[4.3%] top-[7.4%] h-[14.4%] w-[16.6%] rounded-2xl bg-[#d4eed8]" />
         <div className="absolute inset-y-0 left-[23%] w-[2.4%] bg-white" />
@@ -37,7 +38,7 @@ export default function MapaBairro({ ocorrencias, selecionada, onSelecionar }: M
             onClick={() => onSelecionar(ocorrencia.id)}
             aria-label={`${ocorrencia.titulo} — ${label}`}
             aria-pressed={ativa}
-            className={`absolute z-10 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full outline-offset-2 focus-visible:outline-2 focus-visible:outline-brand ${ativa ? 'ring-2 ring-brand ring-offset-2' : ''}`}
+            className={`absolute flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full outline-offset-2 focus-visible:outline-2 focus-visible:outline-brand ${ativa ? 'z-20 ring-2 ring-brand ring-offset-2' : 'z-10'}`}
             style={{ left: `${ocorrencia.posicao.x}%`, top: `${ocorrencia.posicao.y}%` }}
           >
             <span className={`relative flex h-9 w-9 items-center justify-center rounded-full border-2 border-white text-white shadow-md after:absolute after:-bottom-1 after:left-1/2 after:-z-10 after:h-3 after:w-3 after:-translate-x-1/2 after:rotate-45 after:bg-inherit ${pin}`}>
@@ -48,9 +49,14 @@ export default function MapaBairro({ ocorrencias, selecionada, onSelecionar }: M
       })}
 
       {ocorrenciaSelecionada && (
-        <div className="absolute inset-x-4 top-4 z-10 mx-auto max-w-sm rounded-xl bg-white p-3 shadow-md md:inset-x-6" role="status">
-          <p className="text-sm font-semibold">{ocorrenciaSelecionada.titulo}</p>
-          <p className="mt-1 text-xs text-neutral-600">{ocorrenciaSelecionada.endereco}</p>
+        <div className="absolute inset-x-4 top-4 z-30 mx-auto max-h-[calc(100%-8rem)] max-w-sm overflow-y-auto rounded-xl bg-white p-3 shadow-md md:inset-x-6" role="status">
+          <div className="flex items-start justify-between gap-2">
+            <p className="min-w-0 break-words text-sm font-semibold">{ocorrenciaSelecionada.titulo}</p>
+            <button type="button" aria-label="Fechar detalhes da ocorrência" onClick={() => onSelecionar(ocorrenciaSelecionada.id)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-neutral-600 hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-brand"><X size={16} aria-hidden /></button>
+          </div>
+          {ocorrenciaSelecionada.foto && <FotoOcorrencia foto={ocorrenciaSelecionada.foto} alt="Foto da ocorrência selecionada" className="mt-2 h-28 w-full rounded-lg object-cover" />}
+          {ocorrenciaSelecionada.descricao && ocorrenciaSelecionada.descricao !== ocorrenciaSelecionada.titulo && <p className="mt-2 break-words text-xs leading-relaxed text-neutral-700">{ocorrenciaSelecionada.descricao}</p>}
+          <p className="mt-2 break-words text-xs text-neutral-600">{ocorrenciaSelecionada.endereco} · {ocorrenciaSelecionada.bairro}</p>
           <Link to={`/ocorrencias/${ocorrenciaSelecionada.id}`} className="mt-2 inline-block rounded text-xs font-semibold text-blue-700 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-brand">
             Ver detalhes da ocorrência
           </Link>

@@ -1,7 +1,9 @@
 import { Fragment, useState } from 'react'
 import { Image, Search, X } from 'lucide-react'
-import { bairroMapa, ocorrencias } from '../../data/mapa'
-import type { CategoriaOcorrencia } from '../../types'
+import { useLocation, useSearchParams } from 'react-router-dom'
+import { bairroMapa } from '../../data/mapa'
+import useOcorrencias from '../../hooks/useOcorrencias'
+import type { CategoriaRegistro } from '../../types'
 import { filtros } from './config'
 import MapaBairro from './MapaBairro'
 import OcorrenciaCard from './OcorrenciaCard'
@@ -12,27 +14,39 @@ function normalizar(texto: string) {
 
 export default function Mapa() {
   const [busca, setBusca] = useState('')
-  const [categoria, setCategoria] = useState<CategoriaOcorrencia | 'todas'>('todas')
-  const [selecionada, setSelecionada] = useState<number | null>(null)
+  const [categoria, setCategoria] = useState<CategoriaRegistro | 'todas'>('todas')
+  const [parametros, setParametros] = useSearchParams()
+  const location = useLocation()
+  const { ocorrencias, estado, tentarNovamente } = useOcorrencias()
+  const idSelecionado = Number(parametros.get('ocorrencia'))
+  const selecionada = Number.isSafeInteger(idSelecionado) && idSelecionado > 0 ? idSelecionado : null
   const termo = normalizar(busca)
   const filtradas = ocorrencias.filter((ocorrencia) => (
     (categoria === 'todas' || ocorrencia.categoria === categoria)
-    && normalizar(`${ocorrencia.bairro} ${ocorrencia.endereco} ${ocorrencia.titulo}`).includes(termo)
+    && normalizar(`${ocorrencia.bairro} ${ocorrencia.endereco} ${ocorrencia.titulo} ${ocorrencia.descricao ?? ''}`).includes(termo)
   ))
   const selecionadaVisivel = filtradas.some(({ id }) => id === selecionada) ? selecionada : null
+  const bairroAtual = ocorrencias.find(({ id }) => id === selecionada)?.bairro ?? bairroMapa
+  const recemCriada = selecionadaVisivel !== null && location.state?.ocorrenciaCriada === selecionadaVisivel
 
   function selecionar(id: number) {
-    setSelecionada((atual) => atual === id ? null : id)
+    setParametros((atuais) => {
+      const novos = new URLSearchParams(atuais)
+      if (selecionada === id) novos.delete('ocorrencia')
+      else novos.set('ocorrencia', String(id))
+      return novos
+    }, { replace: true })
   }
 
   return (
     <div className="flex flex-col md:h-[calc(100dvh-4rem-1px)] md:min-h-[560px] md:flex-row">
       <section className="flex w-full shrink-0 flex-col bg-white md:w-1/3 md:min-w-[320px]" aria-labelledby="titulo-mapa">
         <div className="px-4 pb-3 pt-6 sm:px-6">
-          <h1 id="titulo-mapa" className="text-2xl font-semibold">{bairroMapa}</h1>
+          <h1 id="titulo-mapa" className="text-2xl font-semibold">{bairroAtual}</h1>
           <p className="mt-3 text-sm text-neutral-600" role="status">
-            {filtradas.length} {filtradas.length === 1 ? 'ocorrência no bairro' : 'ocorrências no bairro'}
+            {estado === 'carregando' ? 'Carregando ocorrências...' : `${filtradas.length} ${filtradas.length === 1 ? 'ocorrência no mapa' : 'ocorrências no mapa'}`}
           </p>
+          {recemCriada && <p role="status" className="mt-2 text-xs leading-relaxed text-green-800">Ocorrência salva neste navegador e destacada no mapa.</p>}
 
           <div className="relative mt-4">
             <Search size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" aria-hidden />
@@ -62,7 +76,14 @@ export default function Mapa() {
         </div>
 
         <div className="max-h-[400px] overflow-y-auto px-4 pb-6 sm:px-6 md:max-h-none md:flex-1">
-          {filtradas.length > 0 ? (
+          {estado === 'carregando' ? (
+            <p className="py-6 text-sm text-neutral-600" role="status">Buscando registros salvos...</p>
+          ) : estado === 'erro' ? (
+            <div className="py-6" role="alert">
+              <p className="text-sm font-semibold">Não foi possível carregar as ocorrências.</p>
+              <button type="button" onClick={tentarNovamente} className="mt-3 min-h-11 rounded-lg px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-brand">Tentar novamente</button>
+            </div>
+          ) : filtradas.length > 0 ? (
             <ul className="flex flex-col gap-3" aria-label="Ocorrências do bairro">
               {filtradas.map((ocorrencia, indice) => (
                 <Fragment key={ocorrencia.id}>

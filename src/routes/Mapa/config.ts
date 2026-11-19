@@ -1,11 +1,16 @@
-import { CircleDot, CircleCheck, Construction, Lightbulb, List, RotateCcw, Users, Waves } from 'lucide-react'
-import type { CategoriaOcorrencia, StatusOcorrencia } from '../../types'
+import { Bug, CircleDot, CircleCheck, Construction, Droplet, Grid2X2, Lightbulb, List, RotateCcw, Trash2, TreePine, Users, Waves } from 'lucide-react'
+import type { CategoriaRegistro, StatusOcorrencia } from '../../types'
 
 export const categorias = {
   buraco: { label: 'Buraco na via', Icone: Construction },
+  calcada: { label: 'Calçada danificada', Icone: Grid2X2 },
   iluminacao: { label: 'Iluminação', Icone: Lightbulb },
+  poda: { label: 'Poda de árvore', Icone: TreePine },
+  descarte: { label: 'Descarte irregular de lixo', Icone: Trash2 },
+  esgoto: { label: 'Esgoto a céu aberto', Icone: Droplet },
   alagamento: { label: 'Alagamento', Icone: Waves },
-} satisfies Record<CategoriaOcorrencia, { label: string; Icone: typeof Construction }>
+  pragas: { label: 'Infestação de pragas', Icone: Bug },
+} satisfies Record<CategoriaRegistro, { label: string; Icone: typeof Construction }>
 
 export const statusOcorrencia = {
   aberta: { label: 'Aberta', Icone: CircleDot, badge: 'bg-amber-100 text-amber-800', pin: 'bg-amber-800' },

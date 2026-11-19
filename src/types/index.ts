@@ -51,11 +51,14 @@ export interface OcorrenciaMapa {
   titulo: string
   endereco: string
   bairro: string
-  categoria: CategoriaOcorrencia
+  categoria: CategoriaRegistro
   status: StatusOcorrencia
   apoios: number
   tempo: string
   posicao: { x: number; y: number }
+  descricao?: string
+  foto?: Blob
+  criadoEm?: string
 }
 
 export interface RegistroOcorrenciaForm {
