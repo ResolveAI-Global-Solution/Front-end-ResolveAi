@@ -14,7 +14,7 @@ Empresa: **ResolveAi** · Turma: **1TDSPW**
 | **Aplicação (Vercel)** | https://resolve-ai-half-tech.vercel.app/ |
 | **Repositório (GitHub)** | https://github.com/ResolveAI-Global-Solution/Front-end-ResolveAi |
 | **API Java (Render)** | https://resolveai-api-3tvg.onrender.com |
-| **Vídeo (YouTube)** | `PREENCHER: https://youtu.be/<id>` |
+| **Vídeo (YouTube)** | https://www.youtube.com/watch?v=INX1-u6Y-iE |
 
 > A API está no plano gratuito do Render, que "dorme" depois de um tempo sem uso. Se a primeira tela demorar para carregar, espere alguns segundos e atualize.
 
